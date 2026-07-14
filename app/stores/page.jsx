@@ -1,0 +1,13 @@
+export const metadata = { title: "Stores Near Me | The Bull & Bear Co." };
+
+export default function StoresPage() {
+  return (
+    <div className="px-4 pt-10 text-center">
+      <h1 className="font-display font-black text-2xl mb-2">Stores Near Me</h1>
+      <p className="text-graphite text-sm max-w-xs mx-auto">
+        We're currently online-only. Retail locations are opening soon —
+        enable location access when we launch to find the nearest store.
+      </p>
+    </div>
+  );
+}
