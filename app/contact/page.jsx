@@ -1,3 +1,4 @@
+"use client"
 export const metadata = { title: "Contact Us | The Bull & Bear Co." };
 
 export default function ContactPage() {
