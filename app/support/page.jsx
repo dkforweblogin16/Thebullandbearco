@@ -14,7 +14,7 @@ export default function SupportPage() {
         minutes during market hours.
       </p>
       <a
-        href="https://wa.me/910000000000"
+        href="https://wa.me/919110933519"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-block bg-green text-paper px-6 py-3 font-semibold tracking-wide"
