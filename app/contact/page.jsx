@@ -1,4 +1,6 @@
-"use client"
+// FILE PATH: app/contact/page.jsx
+import ContactForm from "./ContactForm";
+
 export const metadata = { title: "Contact Us | The Bull & Bear Co." };
 
 export default function ContactPage() {
@@ -7,27 +9,7 @@ export default function ContactPage() {
       <h1 className="font-display font-black text-2xl text-center mb-6">
         Contact Us
       </h1>
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <input
-          type="text"
-          placeholder="Your Name"
-          className="w-full border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-ink"
-        />
-        <input
-          type="email"
-          placeholder="Email Address"
-          className="w-full border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-ink"
-        />
-        <textarea
-          placeholder="Your message"
-          rows={4}
-          className="w-full border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-ink"
-        />
-        <button className="w-full bg-ink text-paper py-3.5 font-semibold tracking-wide">
-          Send Message
-        </button>
-      </form>
+      <ContactForm />
     </div>
   );
 }
-
