@@ -1,0 +1,9 @@
+// FILE PATH: app/api/admin/logout/route.js
+import { NextResponse } from "next/server";
+
+export async function POST() {
+  const res = NextResponse.json({ success: true });
+  res.cookies.delete("admin_auth");
+  return res;
+}
+
