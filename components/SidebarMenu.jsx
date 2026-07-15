@@ -1,3 +1,4 @@
+// FILE PATH: components/SidebarMenu.jsx
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,6 +8,8 @@ import { useUI } from "@/store/useUI";
 import { categories } from "@/lib/data";
 
 const footerLinks = [
+  { label: "My Orders", href: "/orders" },
+  { label: "My Wishlist", href: "/wishlist" },
   { label: "Track Order", href: "/track-order" },
   { label: "Reviews", href: "/reviews" },
   { label: "Stores Near Me", href: "/stores" },
