@@ -1,11 +1,12 @@
 // FILE PATH: app/checkout/success/page.jsx
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 
-export default function CheckoutSuccessPage() {
+function SuccessContent() {
   const params = useSearchParams();
   const orderNumber = params.get("order");
 
@@ -40,6 +41,14 @@ export default function CheckoutSuccessPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" />}>
+      <SuccessContent />
+    </Suspense>
   );
 }
 
