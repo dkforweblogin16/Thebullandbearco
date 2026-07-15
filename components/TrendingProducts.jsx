@@ -1,6 +1,7 @@
+// FILE PATH: components/TrendingProducts.jsx
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/data";
+import { products as mockProducts } from "@/lib/data";
 
 export default function TrendingProducts({
   title = "Trending Now",
@@ -8,8 +9,10 @@ export default function TrendingProducts({
   count = 4,
   offset = 0,
   seeAllHref = "/collection/all",
+  products,
 }) {
-  const list = products.slice(offset, offset + count);
+  const source = products || mockProducts;
+  const list = source.slice(offset, offset + count);
 
   return (
     <section className="py-10">
