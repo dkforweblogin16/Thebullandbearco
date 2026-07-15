@@ -1,10 +1,16 @@
+// FILE PATH: app/page.jsx
 import HeroCarousel from "@/components/HeroCarousel";
 import FeatureBar from "@/components/FeatureBar";
 import CategoryGrid from "@/components/CategoryGrid";
 import TrendingProducts from "@/components/TrendingProducts";
 import Link from "next/link";
+import { fetchAllProducts } from "@/lib/products";
 
-export default function HomePage() {
+export const revalidate = 60; // re-fetch the catalog at most once a minute
+
+export default async function HomePage() {
+  const products = await fetchAllProducts();
+
   return (
     <>
       <HeroCarousel />
@@ -15,6 +21,7 @@ export default function HomePage() {
         title="Trending Products"
         subtitle="What the desk is buying this week"
         offset={0}
+        products={products}
       />
 
       <section className="px-4 py-10 bg-ink text-paper">
@@ -42,6 +49,7 @@ export default function HomePage() {
         title="Bull & Bear Favourite"
         subtitle="Handpicked bestsellers, restocked weekly"
         offset={4}
+        products={products}
       />
     </>
   );
