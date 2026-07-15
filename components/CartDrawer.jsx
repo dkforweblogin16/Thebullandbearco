@@ -1,13 +1,17 @@
+// FILE PATH: components/CartDrawer.jsx
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/store/useCart";
 
 export default function CartDrawer() {
   const { isOpen, closeCart, items, updateQty, removeItem, totalPrice } =
     useCart();
+  const router = useRouter();
 
   return (
     <AnimatePresence>
@@ -106,7 +110,13 @@ export default function CartDrawer() {
                     ₹{totalPrice()}
                   </span>
                 </div>
-                <button className="w-full bg-ink text-paper py-4 font-semibold tracking-wide active:scale-[0.98] transition-transform">
+                <button
+                  onClick={() => {
+                    closeCart();
+                    router.push("/checkout");
+                  }}
+                  className="w-full bg-ink text-paper py-4 font-semibold tracking-wide active:scale-[0.98] transition-transform"
+                >
                   Checkout
                 </button>
               </div>
