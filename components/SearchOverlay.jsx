@@ -1,22 +1,40 @@
+// FILE PATH: components/SearchOverlay.jsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Search } from "lucide-react";
 import Link from "next/link";
 import { useUI } from "@/store/useUI";
-import { products } from "@/lib/data";
+import { fetchAllProducts } from "@/lib/products";
 
 export default function SearchOverlay() {
   const { searchOpen, closeSearch } = useUI();
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (searchOpen && !loaded) {
+      fetchAllProducts().then((data) => {
+        setProducts(data);
+        setLoaded(true);
+      });
+    }
+  }, [searchOpen, loaded]);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
+    const q = query.toLowerCase();
     return products
-      .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      )
       .slice(0, 6);
-  }, [query]);
+  }, [query, products]);
 
   return (
     <AnimatePresence>
