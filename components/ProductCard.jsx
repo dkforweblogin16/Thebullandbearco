@@ -1,12 +1,18 @@
+// FILE PATH: components/ProductCard.jsx
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Plus } from "lucide-react";
+import { Star, Plus, Heart } from "lucide-react";
 import { useCart } from "@/store/useCart";
+import { useWishlist } from "@/store/useWishlist";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ProductCard({ product, showReviews = false, className = "" }) {
   const addItem = useCart((s) => s.addItem);
+  const { has, toggle } = useWishlist();
+  const { user } = useAuth();
+  const wishlisted = has(product.id);
   const hasMultipleImages = product.images.length > 1;
 
   return (
@@ -20,16 +26,31 @@ export default function ProductCard({ product, showReviews = false, className = 
             sizes="45vw"
             className="object-cover"
           />
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              addItem(product, product.sizes[1] || product.sizes[0]);
-            }}
-            aria-label="Quick add to cart"
-            className="absolute top-2 right-2 bg-paper/90 backdrop-blur rounded-full p-1.5 active:scale-90 transition-transform"
-          >
-            <Plus size={16} className="text-ink" />
-          </button>
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                toggle(product.id, user?.id);
+              }}
+              aria-label="Toggle wishlist"
+              className="bg-paper/90 backdrop-blur rounded-full p-1.5 active:scale-90 transition-transform"
+            >
+              <Heart
+                size={16}
+                className={wishlisted ? "fill-red text-red" : "text-ink"}
+              />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                addItem(product, product.sizes[1] || product.sizes[0]);
+              }}
+              aria-label="Quick add to cart"
+              className="bg-paper/90 backdrop-blur rounded-full p-1.5 active:scale-90 transition-transform"
+            >
+              <Plus size={16} className="text-ink" />
+            </button>
+          </div>
           <div className="absolute top-2 left-2 flex items-center gap-1 bg-paper border border-line rounded-md px-2 py-1">
             <Star size={12} className="fill-gold text-gold" />
             <span className="text-[11px] font-bold text-ink">
