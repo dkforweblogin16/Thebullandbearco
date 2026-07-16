@@ -10,12 +10,16 @@ import ProductCard from "@/components/ProductCard";
 import ProductFeed from "@/components/ProductFeed";
 import SortSheet from "@/components/SortSheet";
 import FilterSheet, { priceRanges, emptyFilters } from "@/components/FilterSheet";
+import OfferCard from "@/components/OfferCard";
+import SaleCountdown from "@/components/SaleCountdown";
+import ColorSwatches from "@/components/ColorSwatches";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const product = getProductById(params.id);
   const addItem = useCart((s) => s.addItem);
   const [activeImg, setActiveImg] = useState(0);
+  const [activeColor, setActiveColor] = useState(0);
   const [size, setSize] = useState(null);
   const [added, setAdded] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -29,6 +33,16 @@ export default function ProductDetailPage() {
         <p className="font-display text-xl text-ink">Item not found.</p>
       </div>
     );
+  }
+
+  const galleryImages =
+    product.colors?.[activeColor]?.images?.length
+      ? product.colors[activeColor].images
+      : product.images;
+
+  function handleColorSelect(i) {
+    setActiveColor(i);
+    setActiveImg(0);
   }
 
   const related = products
@@ -70,15 +84,15 @@ export default function ProductDetailPage() {
     <div className="pb-24">
       <div className="relative w-full aspect-[4/5] bg-mist">
         <Image
-          src={product.images[activeImg]}
+          src={galleryImages[activeImg]}
           alt={product.name}
           fill
           priority
           className="object-cover"
         />
-        {product.images.length > 1 && (
+        {galleryImages.length > 1 && (
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-            {product.images.map((_, i) => (
+            {galleryImages.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(i)}
@@ -136,6 +150,15 @@ export default function ProductDetailPage() {
         <p className="text-sm text-violet font-medium mt-1">
           Lowest price in last 30 days
         </p>
+
+        <OfferCard product={product} />
+        <SaleCountdown />
+
+        <ColorSwatches
+          colors={product.colors}
+          activeIndex={activeColor}
+          onSelect={handleColorSelect}
+        />
 
         <p className="text-sm text-graphite leading-relaxed mt-4">
           {product.description}

@@ -14,6 +14,11 @@ const tabs = [
 export default function BottomNav() {
   const pathname = usePathname();
 
+  // Only show the Home/Category/New/Account bar on the home page.
+  // Every other page (product, collection, contact, etc.) already has
+  // its own bottom bar (Sort/Filter or Add to Cart) — this stays out of the way.
+  if (pathname !== "/") return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-line flex justify-around items-center h-16">
       {tabs.map((t) => {
