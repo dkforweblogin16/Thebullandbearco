@@ -9,6 +9,7 @@ import SearchOverlay from "@/components/SearchOverlay";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import Footer from "@/components/Footer";
 import MainWrapper from "@/components/MainWrapper";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,16 +34,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-body">
-        <AnnouncementBar />
-        <Header />
-        <SidebarMenu />
-        <SearchOverlay />
-        <CartDrawer />
-        <MainWrapper>
-          {children}
-          <Footer />
-        </MainWrapper>
-        <BottomNav />
+        <AuthProvider>
+          <AnnouncementBar />
+          <Header />
+          <SidebarMenu />
+          <SearchOverlay />
+          <CartDrawer />
+          <MainWrapper>
+            {children}
+            <Footer />
+          </MainWrapper>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );
