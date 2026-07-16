@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
         onApply={setFilters}
       />
 
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
         <button
           onClick={() => setFilterOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-ink"

@@ -1,35 +1,23 @@
-// FILE PATH: app/collection/[slug]/page.jsx
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import ProductFeed from "@/components/ProductFeed";
 import SortSheet from "@/components/SortSheet";
 import FilterSheet, { priceRanges, emptyFilters } from "@/components/FilterSheet";
-import { fetchAllProducts } from "@/lib/products";
-import { categories, collections } from "@/lib/data";
+import { products, categories, collections } from "@/lib/data";
 
 const fitPills = ["All", "Classic", "Oversized", "Polo"];
 
 export default function CollectionPage() {
   const params = useParams();
   const slug = params.slug;
-
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activePill, setActivePill] = useState("All");
   const [sortOpen, setSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
-
-  useEffect(() => {
-    fetchAllProducts().then((data) => {
-      setAllProducts(data);
-      setLoading(false);
-    });
-  }, []);
 
   const meta =
     categories.find((c) => c.slug === slug) ||
@@ -47,7 +35,7 @@ export default function CollectionPage() {
 
   const list = useMemo(() => {
     let items =
-      slug === "all" ? allProducts : allProducts.filter((p) => p.category === slug);
+      slug === "all" ? products : products.filter((p) => p.category === slug);
 
     if (activePill !== "All") {
       items = items.filter((p) =>
@@ -69,10 +57,10 @@ export default function CollectionPage() {
     if (sortBy === "price-low") items = [...items].sort((a, b) => a.price - b.price);
     if (sortBy === "price-high") items = [...items].sort((a, b) => b.price - a.price);
     if (sortBy === "best") items = [...items].sort((a, b) => b.rating - a.rating);
-    if (sortBy === "new") items = [...items].sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    if (sortBy === "new") items = [...items].sort((a, b) => b.id - a.id);
 
     return items;
-  }, [allProducts, slug, activePill, sortBy, filters]);
+  }, [slug, activePill, sortBy, filters]);
 
   return (
     <div className="pb-16">
@@ -105,12 +93,11 @@ export default function CollectionPage() {
         ))}
       </div>
 
-      <p className="px-4 text-sm text-graphite mb-3">
-        {loading ? "Loading..." : `${list.length} items`}
-      </p>
+      <p className="px-4 text-sm text-graphite mb-3">{list.length} items</p>
 
-      {!loading && list.length > 0 && <ProductFeed products={list} />}
-      {!loading && list.length === 0 && (
+      {list.length > 0 ? (
+        <ProductFeed products={list} />
+      ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-6 px-4">
           <p className="col-span-2 text-center text-graphite py-10 text-sm">
             No positions here yet — check back soon.
@@ -131,7 +118,7 @@ export default function CollectionPage() {
         onApply={setFilters}
       />
 
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
         <button
           onClick={() => setFilterOpen(true)}
           className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-ink"
