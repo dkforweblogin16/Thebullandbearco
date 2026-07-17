@@ -2,8 +2,9 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star, ShoppingBag, Heart, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Star, ShoppingBag, Heart, Zap, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { fetchProductById, fetchAllProducts } from "@/lib/products";
 import { fetchReviews, submitReview } from "@/lib/reviews";
 import { useCart } from "@/store/useCart";
@@ -13,8 +14,15 @@ import ProductCard from "@/components/ProductCard";
 import ProductFeed from "@/components/ProductFeed";
 import SortSheet from "@/components/SortSheet";
 import FilterSheet, { priceRanges, emptyFilters } from "@/components/FilterSheet";
+import OfferCard from "@/components/OfferCard";
+import SaleCountdown from "@/components/SaleCountdown";
+import SizeGuideModal from "@/components/SizeGuideModal";
+import DeliveryCheck from "@/components/DeliveryCheck";
+import ProductAccordions from "@/components/ProductAccordions";
+import ColorSwatches from "@/components/ColorSwatches";
 
 export default function ProductDetailClient({ id }) {
+  const router = useRouter();
   const addItem = useCart((s) => s.addItem);
   const { has, toggle } = useWishlist();
   const { user } = useAuth();
@@ -25,12 +33,14 @@ export default function ProductDetailClient({ id }) {
   const [loading, setLoading] = useState(true);
 
   const [activeImg, setActiveImg] = useState(0);
+  const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [size, setSize] = useState(null);
   const [added, setAdded] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
   const [reviewMsg, setReviewMsg] = useState("");
@@ -47,6 +57,8 @@ export default function ProductDetailClient({ id }) {
       setProduct(p);
       setAllProducts(all);
       setReviews(revs);
+      setActiveImg(0);
+      setActiveColorIndex(0);
       setLoading(false);
     });
     return () => {
@@ -98,6 +110,10 @@ export default function ProductDetailClient({ id }) {
   }
 
   const wishlisted = has(product.id);
+  const displayImages =
+    product.colors?.length && product.colors[activeColorIndex]?.images?.length
+      ? product.colors[activeColorIndex].images
+      : product.images;
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : product.rating;
@@ -107,6 +123,12 @@ export default function ProductDetailClient({ id }) {
     addItem(product, size || product.sizes[1] || product.sizes[0]);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
+  }
+
+  function handleBuyNow() {
+    addItem(product, size || product.sizes[1] || product.sizes[0]);
+    setSizeGuideOpen(false);
+    router.push("/checkout");
   }
 
   async function handleSubmitReview(e) {
@@ -132,7 +154,7 @@ export default function ProductDetailClient({ id }) {
     <div className="pb-24">
       <div className="relative w-full aspect-[4/5] bg-mist">
         <Image
-          src={product.images[activeImg]}
+          src={displayImages[activeImg]}
           alt={product.name}
           fill
           priority
@@ -145,9 +167,9 @@ export default function ProductDetailClient({ id }) {
         >
           <Heart size={18} className={wishlisted ? "fill-red text-red" : "text-ink"} />
         </button>
-        {product.images.length > 1 && (
+        {displayImages.length > 1 && (
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-            {product.images.map((_, i) => (
+            {displayImages.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(i)}
@@ -179,20 +201,9 @@ export default function ProductDetailClient({ id }) {
           ))}
         </div>
 
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display font-bold text-2xl leading-tight text-ink">
-            {product.name}
-          </h1>
-          <button
-            onClick={handleAddToCart}
-            className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold tracking-wide active:scale-95 transition-transform ${
-              added ? "bg-green text-paper" : "bg-ink text-paper"
-            }`}
-          >
-            {added ? "Added ✓" : "Add to Cart"}
-            {!added && <ShoppingBag size={15} />}
-          </button>
-        </div>
+        <h1 className="font-display font-bold text-2xl leading-tight text-ink">
+          {product.name}
+        </h1>
 
         <div className="flex items-baseline gap-2 mt-3 tabular">
           <span className="font-bold text-2xl text-ink">₹{product.price}</span>
@@ -207,12 +218,32 @@ export default function ProductDetailClient({ id }) {
           Lowest price in last 30 days
         </p>
 
+        <OfferCard product={product} />
+        <SaleCountdown />
+
         <p className="text-sm text-graphite leading-relaxed mt-4">
           {product.description}
         </p>
 
+        <ColorSwatches
+          colors={product.colors}
+          activeIndex={activeColorIndex}
+          onSelect={(i) => {
+            setActiveColorIndex(i);
+            setActiveImg(0);
+          }}
+        />
+
         <div className="mt-6">
-          <p className="text-sm font-semibold mb-2 text-ink">Select Size</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-ink">Select Size</p>
+            <button
+              onClick={() => setSizeGuideOpen(true)}
+              className="text-xs font-semibold text-ink underline"
+            >
+              Size Guide
+            </button>
+          </div>
           <div className="flex gap-2 flex-wrap">
             {product.sizes.map((s) => (
               <button
@@ -229,10 +260,37 @@ export default function ProductDetailClient({ id }) {
             ))}
           </div>
         </div>
+
+        <div className="flex gap-3 mt-5">
+          <button
+            onClick={handleAddToCart}
+            className={`flex-1 flex items-center justify-center gap-1.5 border py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform ${
+              added ? "border-green text-green" : "border-ink text-ink"
+            }`}
+          >
+            {added ? "Added ✓" : "Add to Cart"}
+            {!added && <ShoppingBag size={15} />}
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-ink text-paper py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform"
+          >
+            Buy Now
+            <Zap size={15} className="fill-gold text-gold" />
+          </button>
+        </div>
+
+        <DeliveryCheck />
+
+        <ProductAccordions
+          description={product.description}
+          rating={avgRating}
+          reviewCount={reviewCount}
+        />
       </div>
 
       {/* Reviews */}
-      <div className="mt-10 px-4">
+      <div id="reviews" className="mt-10 px-4 scroll-mt-20">
         <h2 className="font-display font-bold text-xl text-ink mb-4">
           Reviews ({reviewCount})
         </h2>
@@ -324,6 +382,18 @@ export default function ProductDetailClient({ id }) {
         onClose={() => setFilterOpen(false)}
         filters={filters}
         onApply={setFilters}
+      />
+      <SizeGuideModal
+        open={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+        availableSizes={product.sizes}
+        selectedSize={size}
+        onSelectSize={setSize}
+        onAddToCart={() => {
+          handleAddToCart();
+          setSizeGuideOpen(false);
+        }}
+        onBuyNow={handleBuyNow}
       />
 
       <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
