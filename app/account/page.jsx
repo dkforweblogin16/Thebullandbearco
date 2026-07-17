@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { X, Mail, Smartphone, LogOut } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
@@ -16,6 +17,7 @@ import { useAuth } from "@/components/AuthProvider";
 
 export default function AccountPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
 
   const [method, setMethod] = useState("email"); // "phone" | "email"
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -59,7 +61,12 @@ export default function AccountPage() {
         email,
         password,
       });
-      if (signInError) setError(signInError.message);
+      if (signInError) {
+        setError(signInError.message);
+      } else {
+        router.push("/"); // logged in -> go straight to the storefront
+        return;
+      }
     }
 
     setSubmitting(false);
@@ -242,4 +249,4 @@ export default function AccountPage() {
       </div>
     </div>
   );
-}
+      }
