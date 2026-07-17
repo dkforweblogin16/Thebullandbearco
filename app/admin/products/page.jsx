@@ -572,4 +572,13 @@ export default function AdminProducts() {
 
             <button
               disabled={saving}
-              className="w-full bg-ink text-paper py-3 rounded-lg font-semibold 
+              className="w-full bg-ink text-paper py-3 rounded-lg font-semibold mt-5 disabled:opacity-60"
+            >
+              {saving ? "Saving..." : editing === "new" ? "Create Product" : "Save Changes"}
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
