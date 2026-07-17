@@ -16,7 +16,7 @@
     "zustand": "4.5.4",
     "framer-motion": "11.3.19",
     "lucide-react": "0.408.0",
-    "recharts": "^2.15.0"
+    "recharts": "^2.15.0",
     "@supabase/supabase-js": "2.45.4",
     "razorpay": "2.9.4"
   },
