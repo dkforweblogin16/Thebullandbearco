@@ -1,7 +1,9 @@
+// FILE PATH: components/Footer.jsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Instagram, Facebook, MessageCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { categories } from "@/lib/data";
 
@@ -32,7 +34,15 @@ const accordions = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(null);
+
+  // Don't show the footer on focused-flow pages — login, checkout, admin.
+  const hideOnRoutes = ["/account", "/checkout", "/admin"];
+  const hide = hideOnRoutes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  );
+  if (hide) return null;
 
   return (
     <footer className="bg-ink text-paper px-5 pt-10 pb-8 mt-6">
@@ -111,3 +121,4 @@ export default function Footer() {
     </footer>
   );
 }
+
