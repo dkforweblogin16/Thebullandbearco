@@ -1,11 +1,24 @@
 // FILE PATH: app/contact/ContactForm.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ContactForm() {
+  const { user, profile } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
+
+  // Auto-fill name & email for a logged-in customer -- only fills
+  // blank fields, never overwrites something already typed.
+  useEffect(() => {
+    if (!user) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || profile?.full_name || "",
+      email: f.email || profile?.email || user.email || "",
+    }));
+  }, [user, profile]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -59,4 +72,3 @@ export default function ContactForm() {
     </form>
   );
 }
-
