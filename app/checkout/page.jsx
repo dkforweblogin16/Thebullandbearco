@@ -24,6 +24,16 @@ function loadRazorpayScript() {
   });
 }
 
+// Fire-and-forget email notification -- never blocks or breaks checkout
+// if it fails (network issue, Resend not configured, etc.)
+function notifyOrderPlaced(payload) {
+  fetch("/api/orders/notify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
@@ -32,6 +42,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState({
     fullName: "",
     phone: "",
+    email: "",
     line1: "",
     line2: "",
     city: "",
@@ -39,17 +50,16 @@ export default function CheckoutPage() {
     pincode: "",
   });
 
-  // Auto-fill name & phone the moment we know who's logged in, so a
-  // returning customer can place an order in one tap. Only fills blank
-  // fields -- never overwrites something the person already typed.
+  // Auto-fill name, phone & email the moment we know who's logged in --
+  // only fills blank fields, never overwrites something already typed.
   useEffect(() => {
-    if (!profile) return;
     setAddress((a) => ({
       ...a,
-      fullName: a.fullName || profile.full_name || "",
-      phone: a.phone || profile.phone || "",
+      fullName: a.fullName || profile?.full_name || "",
+      phone: a.phone || profile?.phone || "",
+      email: a.email || profile?.email || user?.email || "",
     }));
-  }, [profile]);
+  }, [profile, user]);
 
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponInput, setCouponInput] = useState("");
@@ -108,6 +118,13 @@ export default function CheckoutPage() {
     try {
       if (paymentMethod === "cod") {
         const { orderNumber } = await createCodOrder(buildOrderPayload());
+        notifyOrderPlaced({
+          orderNumber,
+          name: address.fullName,
+          email: address.email,
+          total,
+          items,
+        });
         clearCart();
         router.push(`/checkout/success?order=${orderNumber}`);
         return;
@@ -135,7 +152,7 @@ export default function CheckoutPage() {
         prefill: {
           name: address.fullName,
           contact: address.phone,
-          email: user?.email || "",
+          email: address.email,
         },
         theme: { color: "#1D2B53" },
         handler: async function (response) {
@@ -155,6 +172,13 @@ export default function CheckoutPage() {
             setBusy(false);
             return;
           }
+          notifyOrderPlaced({
+            orderNumber: verifyData.orderNumber,
+            name: address.fullName,
+            email: address.email,
+            total,
+            items,
+          });
           clearCart();
           router.push(`/checkout/success?order=${verifyData.orderNumber}`);
         },
@@ -208,6 +232,13 @@ export default function CheckoutPage() {
               className="flex-1 px-3 py-2.5 text-sm outline-none"
             />
           </div>
+          <input
+            type="email"
+            placeholder="Email (for order updates)"
+            value={address.email}
+            onChange={(e) => setAddress({ ...address, email: e.target.value })}
+            className="w-full border border-line rounded-lg px-3 py-2.5 text-sm outline-none focus:border-ink"
+          />
           <input
             placeholder="Address Line 1 (House no, Street)"
             value={address.line1}
@@ -343,4 +374,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-}
+                }
