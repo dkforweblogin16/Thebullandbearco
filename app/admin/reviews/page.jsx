@@ -4,6 +4,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { adminFetch } from "@/lib/adminApi";
 import { Trash2, Star, Search, Check, X as XIcon } from "lucide-react";
+import { products } from "@/lib/data";
+
+function productName(productId) {
+  const match = products.find((p) => String(p.id) === String(productId));
+  return match?.name || `Product #${productId}`;
+}
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
@@ -28,7 +34,7 @@ export default function AdminReviews() {
       if (filter === "approved" && !r.is_approved) return false;
       if (search) {
         const q = search.toLowerCase();
-        const haystack = `${r.reviewer_name} ${r.products?.name || ""} ${r.comment || ""}`.toLowerCase();
+        const haystack = `${r.reviewer_name} ${productName(r.product_id)} ${r.comment || ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -115,7 +121,7 @@ export default function AdminReviews() {
                   )}
                 </div>
                 <p className="text-sm text-ink font-medium">{r.reviewer_name}</p>
-                <p className="text-xs text-graphite mb-1">{r.products?.name}</p>
+                <p className="text-xs text-graphite mb-1">{productName(r.product_id)}</p>
                 {r.comment && <p className="text-sm text-graphite">{r.comment}</p>}
               </div>
               <div className="flex flex-col gap-2 items-end shrink-0">
