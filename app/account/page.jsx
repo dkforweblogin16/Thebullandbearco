@@ -25,6 +25,7 @@ export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -48,7 +49,7 @@ export default function AccountPage() {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: { data: { full_name: name, phone } },
       });
       if (signUpError) {
         setError(signUpError.message);
@@ -173,6 +174,16 @@ export default function AccountPage() {
                 className="w-full border border-line rounded-lg px-4 py-3 text-sm outline-none"
               />
             )}
+            {mode === "signup" && (
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="Mobile Number"
+                className="w-full border border-line rounded-lg px-4 py-3 text-sm outline-none"
+              />
+            )}
             <input
               type="email"
               required
@@ -243,10 +254,10 @@ export default function AccountPage() {
 
         <p className="text-[11px] text-graphite text-center mt-5 leading-relaxed">
           By continuing, you're agreeing to our{" "}
-          <span className="underline text-ink">Privacy Policy</span> &{" "}
-          <span className="underline text-ink">Terms of Service</span>
+          <Link href="/privacy" className="underline text-ink">Privacy Policy</Link> &{" "}
+          <Link href="/terms" className="underline text-ink">Terms of Service</Link>
         </p>
       </div>
     </div>
   );
-      }
+}
