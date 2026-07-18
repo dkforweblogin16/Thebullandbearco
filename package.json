@@ -18,7 +18,8 @@
     "lucide-react": "0.408.0",
     "recharts": "^2.15.0",
     "@supabase/supabase-js": "2.45.4",
-    "razorpay": "2.9.4"
+    "razorpay": "2.9.4",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "autoprefixer": "10.4.19",
