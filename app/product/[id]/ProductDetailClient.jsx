@@ -414,4 +414,3 @@ export default function ProductDetailClient({ id }) {
     </div>
   );
 }
-
