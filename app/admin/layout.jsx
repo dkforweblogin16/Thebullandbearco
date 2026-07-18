@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Tag,
   Star,
+  Mail,
   BarChart3,
   Settings,
   Users,
@@ -24,6 +25,7 @@ const navItems = [
   { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
   { label: "Coupons", href: "/admin/coupons", icon: Tag },
   { label: "Reviews", href: "/admin/reviews", icon: Star },
+  { label: "Messages", href: "/admin/messages", icon: Mail },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Settings", href: "/admin/settings", icon: Settings },
   { label: "Team", href: "/admin/team", icon: Users },
@@ -81,4 +83,3 @@ export default function AdminLayout({ children }) {
     </AdminGuard>
   );
 }
-
