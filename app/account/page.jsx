@@ -117,11 +117,11 @@ export default function AccountPage() {
         Bull &amp; Bear Co.
       </p>
       <p className="text-paper/60 text-xs tracking-wide mb-8">
-        Powered by TraderPass
+        Powered by FaujiWhoTrades
       </p>
 
       <h1 className="text-paper text-xl font-semibold text-center leading-snug mb-8 max-w-xs">
-        Join the Bull &amp; Bear family for a delightful shopping experience
+        Join the Bull &amp; Bear Co family for a delightful shopping experience
       </h1>
 
       <div className="w-full max-w-sm bg-paper rounded-2xl px-5 py-7 shadow-xl">
@@ -260,4 +260,4 @@ export default function AccountPage() {
       </div>
     </div>
   );
-}
+                }
