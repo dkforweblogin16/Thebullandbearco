@@ -17,7 +17,6 @@ export async function POST(request) {
     .insert({ name, email, message });
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
-  // Email notifications -- failures here never block the saved message.
   if (adminEmail()) {
     await sendEmail({
       to: adminEmail(),
