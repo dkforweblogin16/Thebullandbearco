@@ -1,3 +1,5 @@
+// app/category/page.jsx
+
 "use client";
 
 import { useState } from "react";
