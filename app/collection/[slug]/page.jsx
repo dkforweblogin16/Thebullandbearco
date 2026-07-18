@@ -1,12 +1,14 @@
+// FILE PATH: app/collection/[slug]/page.jsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import ProductFeed from "@/components/ProductFeed";
 import SortSheet from "@/components/SortSheet";
 import FilterSheet, { priceRanges, emptyFilters } from "@/components/FilterSheet";
-import { products, categories, collections } from "@/lib/data";
+import { categories, collections } from "@/lib/data";
+import { fetchProductsByCategory } from "@/lib/products";
 
 const fitPills = ["All", "Classic", "Oversized", "Polo"];
 
@@ -18,6 +20,26 @@ export default function CollectionPage() {
   const [sortBy, setSortBy] = useState("featured");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
+
+  // Loads real products from Supabase once connected & stocked; falls
+  // back to the mock catalog automatically (handled inside
+  // fetchProductsByCategory) so this page keeps working either way.
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchProductsByCategory(slug).then((data) => {
+      if (!cancelled) {
+        setProducts(data);
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   const meta =
     categories.find((c) => c.slug === slug) ||
@@ -34,8 +56,7 @@ export default function CollectionPage() {
     (filters.availability ? 1 : 0);
 
   const list = useMemo(() => {
-    let items =
-      slug === "all" ? products : products.filter((p) => p.category === slug);
+    let items = products;
 
     if (activePill !== "All") {
       items = items.filter((p) =>
@@ -57,10 +78,10 @@ export default function CollectionPage() {
     if (sortBy === "price-low") items = [...items].sort((a, b) => a.price - b.price);
     if (sortBy === "price-high") items = [...items].sort((a, b) => b.price - a.price);
     if (sortBy === "best") items = [...items].sort((a, b) => b.rating - a.rating);
-    if (sortBy === "new") items = [...items].sort((a, b) => b.id - a.id);
+    if (sortBy === "new") items = [...items].sort((a, b) => String(b.id).localeCompare(String(a.id)));
 
     return items;
-  }, [slug, activePill, sortBy, filters]);
+  }, [products, activePill, sortBy, filters]);
 
   return (
     <div className="pb-16">
@@ -93,9 +114,11 @@ export default function CollectionPage() {
         ))}
       </div>
 
-      <p className="px-4 text-sm text-graphite mb-3">{list.length} items</p>
+      <p className="px-4 text-sm text-graphite mb-3">
+        {loading ? "Loading..." : `${list.length} items`}
+      </p>
 
-      {list.length > 0 ? (
+      {loading ? null : list.length > 0 ? (
         <ProductFeed products={list} />
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-6 px-4">
