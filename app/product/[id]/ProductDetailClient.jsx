@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star, ShoppingBag, Heart, Zap, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Star, ShoppingBag, Heart, Zap } from "lucide-react";
 import { fetchProductById, fetchAllProducts } from "@/lib/products";
 import { fetchReviews, submitReview } from "@/lib/reviews";
 import { useCart } from "@/store/useCart";
@@ -12,8 +12,6 @@ import { useWishlist } from "@/store/useWishlist";
 import { useAuth } from "@/components/AuthProvider";
 import ProductCard from "@/components/ProductCard";
 import ProductFeed from "@/components/ProductFeed";
-import SortSheet from "@/components/SortSheet";
-import FilterSheet, { priceRanges, emptyFilters } from "@/components/FilterSheet";
 import OfferCard from "@/components/OfferCard";
 import SaleCountdown from "@/components/SaleCountdown";
 import SizeGuideModal from "@/components/SizeGuideModal";
@@ -36,10 +34,6 @@ export default function ProductDetailClient({ id }) {
   const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [size, setSize] = useState(null);
   const [added, setAdded] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [sortBy, setSortBy] = useState("featured");
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState(emptyFilters);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
@@ -73,31 +67,10 @@ export default function ProductDetailClient({ id }) {
       .slice(0, 4);
   }, [allProducts, product]);
 
-  const activeFilterCount =
-    (filters.price ? 1 : 0) +
-    (filters.colors?.length || 0) +
-    (filters.sizes?.length || 0) +
-    (filters.availability ? 1 : 0);
-
   const feed = useMemo(() => {
     if (!product) return [];
-    let items = allProducts.filter((p) => p.id !== product.id);
-
-    if (filters.price) {
-      const range = priceRanges.find((r) => r.key === filters.price);
-      if (range) items = items.filter((p) => range.test(p.price));
-    }
-    if (filters.sizes?.length) {
-      items = items.filter((p) => p.sizes.some((s) => filters.sizes.includes(s)));
-    }
-
-    if (sortBy === "price-low") items = [...items].sort((a, b) => a.price - b.price);
-    if (sortBy === "price-high") items = [...items].sort((a, b) => b.price - a.price);
-    if (sortBy === "best") items = [...items].sort((a, b) => b.rating - a.rating);
-    if (sortBy === "new") items = [...items].sort((a, b) => String(b.id).localeCompare(String(a.id)));
-
-    return items;
-  }, [allProducts, product, filters, sortBy]);
+    return allProducts.filter((p) => p.id !== product.id);
+  }, [allProducts, product]);
 
   if (loading) return <div className="min-h-[60vh]" />;
 
@@ -261,25 +234,6 @@ export default function ProductDetailClient({ id }) {
           </div>
         </div>
 
-        <div className="flex gap-3 mt-5">
-          <button
-            onClick={handleAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1.5 border py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform ${
-              added ? "border-green text-green" : "border-ink text-ink"
-            }`}
-          >
-            {added ? "Added ✓" : "Add to Cart"}
-            {!added && <ShoppingBag size={15} />}
-          </button>
-          <button
-            onClick={handleBuyNow}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-ink text-paper py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform"
-          >
-            Buy Now
-            <Zap size={15} className="fill-gold text-gold" />
-          </button>
-        </div>
-
         <DeliveryCheck />
 
         <ProductAccordions
@@ -371,18 +325,6 @@ export default function ProductDetailClient({ id }) {
         <ProductFeed products={feed} />
       </div>
 
-      <SortSheet
-        open={sortOpen}
-        onClose={() => setSortOpen(false)}
-        value={sortBy}
-        onChange={setSortBy}
-      />
-      <FilterSheet
-        open={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        filters={filters}
-        onApply={setFilters}
-      />
       <SizeGuideModal
         open={sizeGuideOpen}
         onClose={() => setSizeGuideOpen(false)}
@@ -396,21 +338,25 @@ export default function ProductDetailClient({ id }) {
         onBuyNow={handleBuyNow}
       />
 
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex divide-x divide-line">
+      <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex gap-3 px-4 py-3">
         <button
-          onClick={() => setFilterOpen(true)}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-ink"
+          onClick={handleAddToCart}
+          className={`flex-1 flex items-center justify-center gap-1.5 border py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform ${
+            added ? "border-green text-green" : "border-ink text-ink"
+          }`}
         >
-          <SlidersHorizontal size={16} />
-          Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+          {added ? "Added ✓" : "Add to Cart"}
+          {!added && <ShoppingBag size={15} />}
         </button>
         <button
-          onClick={() => setSortOpen(true)}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-ink"
+          onClick={handleBuyNow}
+          className="flex-1 flex items-center justify-center gap-1.5 bg-ink text-paper py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform"
         >
-          <ArrowUpDown size={16} /> Sort
+          Buy Now
+          <Zap size={15} className="fill-gold text-gold" />
         </button>
       </div>
     </div>
   );
 }
+
