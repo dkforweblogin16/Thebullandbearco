@@ -29,7 +29,7 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-            className="fixed top-0 right-0 h-full w-[88%] max-w-sm bg-paper z-50 flex flex-col"
+            className="fixed inset-y-0 right-0 w-[88%] max-w-sm bg-paper z-50 flex flex-col"
           >
             <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
               <h2 className="font-display font-bold text-lg">
