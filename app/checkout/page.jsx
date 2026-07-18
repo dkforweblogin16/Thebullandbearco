@@ -1,7 +1,7 @@
 // FILE PATH: app/checkout/page.jsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/store/useCart";
@@ -27,7 +27,7 @@ function loadRazorpayScript() {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const [address, setAddress] = useState({
     fullName: "",
@@ -38,6 +38,19 @@ export default function CheckoutPage() {
     state: "",
     pincode: "",
   });
+
+  // Auto-fill name & phone the moment we know who's logged in, so a
+  // returning customer can place an order in one tap. Only fills blank
+  // fields -- never overwrites something the person already typed.
+  useEffect(() => {
+    if (!profile) return;
+    setAddress((a) => ({
+      ...a,
+      fullName: a.fullName || profile.full_name || "",
+      phone: a.phone || profile.phone || "",
+    }));
+  }, [profile]);
+
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState(null);
@@ -122,6 +135,7 @@ export default function CheckoutPage() {
         prefill: {
           name: address.fullName,
           contact: address.phone,
+          email: user?.email || "",
         },
         theme: { color: "#1D2B53" },
         handler: async function (response) {
@@ -330,4 +344,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
