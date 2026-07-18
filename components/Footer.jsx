@@ -37,12 +37,15 @@ export default function Footer() {
   const pathname = usePathname();
   const [open, setOpen] = useState(null);
 
-  // Don't show the footer on focused-flow pages — login, checkout, admin.
-  const hideOnRoutes = ["/account", "/checkout", "/admin"];
-  const hide = hideOnRoutes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
-  );
-  if (hide) return null;
+  // Footer only on browsing/shopping pages — home, categories, product
+// pages, search. Hidden everywhere else (checkout, account, orders,
+// static pages, admin) — no footer at all, not even a slim one.
+const footerRoutes = ["/", "/collection", "/product", "/search"];
+const showFooter = footerRoutes.some(
+  (prefix) =>
+    prefix === "/" ? pathname === "/" : pathname.startsWith(prefix + "/")
+);
+if (!showFooter) return null;
 
   return (
     <footer className="bg-ink text-paper px-5 pt-10 pb-8 mt-6">
@@ -70,7 +73,7 @@ export default function Footer() {
           <Facebook size={18} />
         </a>
         <a
-          href="https://wa.me/910000000000"
+          href="https://wa.me/919110933519"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp"
