@@ -3,11 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { submitContactMessage } from "@/lib/contact";
 
 export default function ContactForm() {
   const { user, profile } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Auto-fill name & email for a logged-in customer -- only fills
   // blank fields, never overwrites something already typed.
@@ -20,11 +23,20 @@ export default function ContactForm() {
     }));
   }, [user, profile]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    // No backend wired up yet — swap this for a real API call
-    // (e.g. POST to an /api/contact route, or a Supabase table) when ready.
-    setSent(true);
+    setError("");
+    setSubmitting(true);
+    try {
+      await submitContactMessage(form);
+      setSent(true);
+    } catch (err) {
+      setError(
+        err.message || "Couldn't send your message right now. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (sent) {
@@ -66,8 +78,12 @@ export default function ContactForm() {
         onChange={(e) => setForm({ ...form, message: e.target.value })}
         className="w-full border border-line rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-ink"
       />
-      <button className="w-full bg-ink text-paper py-3.5 font-semibold tracking-wide">
-        Send Message
+      {error && <p className="text-red text-xs">{error}</p>}
+      <button
+        disabled={submitting}
+        className="w-full bg-ink text-paper py-3.5 font-semibold tracking-wide disabled:opacity-60"
+      >
+        {submitting ? "Sending..." : "Send Message"}
       </button>
     </form>
   );
