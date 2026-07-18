@@ -338,7 +338,10 @@ export default function ProductDetailClient({ id }) {
         onBuyNow={handleBuyNow}
       />
 
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-paper border-t border-line flex gap-3 px-4 py-3">
+      <div
+  className="fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-line flex gap-3 px-4 pt-3"
+  style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+>
         <button
           onClick={handleAddToCart}
           className={`flex-1 flex items-center justify-center gap-1.5 border py-3.5 rounded-lg font-semibold text-sm tracking-wide active:scale-[0.98] transition-transform ${
