@@ -2,10 +2,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { X, MessageCircle } from "lucide-react";
+import { X, MessageCircle, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useUI } from "@/store/useUI";
 import { categories } from "@/lib/data";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/lib/supabaseClient";
 
 const footerLinks = [
   { label: "My Orders", href: "/orders" },
@@ -19,6 +21,12 @@ const footerLinks = [
 
 export default function SidebarMenu() {
   const { menuOpen, closeMenu } = useUI();
+  const { user, profile } = useAuth();
+
+  function handleLogout() {
+    supabase.auth.signOut();
+    closeMenu();
+  }
 
   return (
     <AnimatePresence>
@@ -45,6 +53,26 @@ export default function SidebarMenu() {
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            {user && (
+              <Link
+                href="/account"
+                onClick={closeMenu}
+                className="flex items-center gap-3 px-4 py-4 border-b border-line"
+              >
+                <span className="w-10 h-10 rounded-full bg-ink text-paper flex items-center justify-center shrink-0">
+                  <User size={18} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink truncate">
+                    Hi, {profile?.full_name || "there"}
+                  </p>
+                  <p className="text-xs text-graphite truncate">
+                    {profile?.email || user.email}
+                  </p>
+                </div>
+              </Link>
+            )}
+
             <nav className="px-4">
               {categories.map((c) => (
                 <Link
@@ -76,13 +104,22 @@ export default function SidebarMenu() {
           </div>
 
           <div className="p-4 shrink-0 border-t border-line">
-            <Link
-              href="/account"
-              onClick={closeMenu}
-              className="block w-full text-center bg-ink text-paper py-4 font-semibold tracking-wide"
-            >
-              Log In or Sign Up
-            </Link>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-ink text-paper py-4 font-semibold tracking-wide"
+              >
+                <LogOut size={16} /> Log Out
+              </button>
+            ) : (
+              <Link
+                href="/account"
+                onClick={closeMenu}
+                className="block w-full text-center bg-ink text-paper py-4 font-semibold tracking-wide"
+              >
+                Log In or Sign Up
+              </Link>
+            )}
           </div>
         </motion.div>
       )}
