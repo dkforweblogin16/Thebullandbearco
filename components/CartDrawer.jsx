@@ -7,11 +7,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/store/useCart";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 export default function CartDrawer() {
   const { isOpen, closeCart, items, updateQty, removeItem, totalPrice } =
     useCart();
   const router = useRouter();
+
+  useScrollLock(isOpen);
 
   return (
     <AnimatePresence>
@@ -22,14 +25,14 @@ export default function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCart}
-            className="fixed inset-0 bg-ink/50 z-50"
+            className="fixed inset-0 h-[100dvh] bg-ink/50 z-50"
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-y-0 right-0 w-[88%] max-w-sm bg-paper z-50 flex flex-col"
+            className="fixed inset-y-0 right-0 h-[100dvh] w-[88%] max-w-sm bg-paper z-50 flex flex-col"
           >
             <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
               <h2 className="font-display font-bold text-lg">
@@ -103,7 +106,10 @@ export default function CartDrawer() {
             </div>
 
             {items.length > 0 && (
-              <div className="p-4 border-t border-line shrink-0 space-y-3">
+              <div
+                className="p-4 border-t border-line shrink-0 space-y-3"
+                style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-graphite text-sm">Subtotal</span>
                   <span className="tabular font-bold text-lg text-ink">

@@ -118,7 +118,17 @@ export default function CollectionPage() {
         {loading ? "Loading..." : `${list.length} items`}
       </p>
 
-      {loading ? null : list.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-6 px-4 animate-pulse">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i}>
+              <div className="aspect-[4/5] bg-mist rounded-xl" />
+              <div className="h-3.5 w-3/4 bg-mist rounded mt-2" />
+              <div className="h-3.5 w-1/2 bg-mist rounded mt-1.5" />
+            </div>
+          ))}
+        </div>
+      ) : list.length > 0 ? (
         <ProductFeed products={list} />
       ) : (
         <div className="grid grid-cols-2 gap-x-3 gap-y-6 px-4">

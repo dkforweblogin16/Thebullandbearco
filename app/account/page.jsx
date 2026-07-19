@@ -1,12 +1,26 @@
 // FILE PATH: app/account/page.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X, Mail, Smartphone, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Mail,
+  Smartphone,
+  LogOut,
+  Package,
+  Heart,
+  MapPin,
+  ChevronRight,
+  LifeBuoy,
+  Star,
+} from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
+import { fetchOrdersForUser } from "@/lib/orders";
+import { useWishlist } from "@/store/useWishlist";
 
 // ---------------------------------------------------------------------
 // Real Supabase Auth (email + password) is wired up below.
@@ -16,7 +30,7 @@ import { useAuth } from "@/components/AuthProvider";
 // ---------------------------------------------------------------------
 
 export default function AccountPage() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
 
   const [method, setMethod] = useState("email"); // "phone" | "email"
@@ -30,6 +44,22 @@ export default function AccountPage() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [orders, setOrders] = useState(null);
+  const wishlistCount = useWishlist((s) => s.ids.length);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      setOrders(null);
+      return;
+    }
+    fetchOrdersForUser(user.id).then((data) => setOrders(data));
+  }, [user]);
+
+  const orderCount = orders?.length ?? null;
+  const totalSpent =
+    orders?.reduce((sum, o) => sum + (Number(o.total) || 0), 0) ?? null;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -75,22 +105,201 @@ export default function AccountPage() {
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    setShowLogoutConfirm(false);
   }
 
   // ---- Already logged in ----
   if (!loading && user) {
+    const displayName =
+      profile?.full_name || user.user_metadata?.full_name || "";
+    const initial = (displayName || user.email || "?").charAt(0).toUpperCase();
+    const memberSince = user.created_at
+      ? new Date(user.created_at).toLocaleDateString("en-IN", {
+          month: "short",
+          year: "numeric",
+        })
+      : null;
+
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-graphite text-sm mb-1">Logged in as</p>
-        <p className="font-display font-bold text-xl text-ink mb-6">
-          {user.email || user.phone}
-        </p>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-ink text-paper px-6 py-3 rounded-lg font-semibold"
+      <div className="min-h-[calc(100vh-8rem)] bg-mist px-5 pt-6 pb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="w-full max-w-sm mx-auto"
         >
-          <LogOut size={16} /> Log Out
-        </button>
+          {/* Profile card */}
+          <div className="rounded-2xl overflow-hidden shadow-xl mb-5">
+            <div
+              className="relative px-6 pt-8 pb-9 text-center overflow-hidden"
+              style={{
+                background:
+                  "linear-gradient(135deg, #0f1a3d 0%, #1D2B53 55%, #2c3f7c 100%)",
+              }}
+            >
+              {/* subtle decorative rings, kept within the navy family */}
+              <div className="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full border border-paper/10" />
+              <div className="pointer-events-none absolute -bottom-14 -left-8 w-36 h-36 rounded-full border border-paper/10" />
+
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.05 }}
+                className="w-16 h-16 rounded-full bg-paper text-ink flex items-center justify-center text-2xl font-display font-bold shadow-lg mx-auto mb-3 relative"
+              >
+                {initial}
+              </motion.div>
+              <p className="text-paper/60 text-xs tracking-wide uppercase mb-1 relative">
+                Welcome back
+              </p>
+              <p className="font-display font-bold text-lg text-paper break-all relative">
+                {displayName || user.email || user.phone}
+              </p>
+              {displayName && (user.email || user.phone) && (
+                <p className="text-paper/50 text-xs mt-0.5 break-all relative">
+                  {user.email || user.phone}
+                </p>
+              )}
+              {memberSince && (
+                <p className="text-paper/40 text-[11px] mt-2 relative">
+                  Member since {memberSince}
+                </p>
+              )}
+            </div>
+
+            {/* Stats strip */}
+            <div className="grid grid-cols-3 bg-paper">
+              <Link
+                href="/orders"
+                className="flex flex-col items-center py-4 border-r border-line active:bg-mist"
+              >
+                <span className="font-display font-bold text-lg text-ink">
+                  {orderCount === null ? "–" : orderCount}
+                </span>
+                <span className="text-graphite text-[11px] mt-0.5">Orders</span>
+              </Link>
+              <Link
+                href="/wishlist"
+                className="flex flex-col items-center py-4 border-r border-line active:bg-mist"
+              >
+                <span className="font-display font-bold text-lg text-ink">
+                  {wishlistCount}
+                </span>
+                <span className="text-graphite text-[11px] mt-0.5">Wishlist</span>
+              </Link>
+              <div className="flex flex-col items-center py-4">
+                <span className="font-display font-bold text-lg text-ink">
+                  {totalSpent === null ? "–" : `₹${totalSpent.toLocaleString("en-IN")}`}
+                </span>
+                <span className="text-graphite text-[11px] mt-0.5">Spent</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div className="bg-paper rounded-2xl shadow-sm divide-y divide-line mb-5 overflow-hidden">
+            <Link
+              href="/orders"
+              className="flex items-center gap-3 px-5 py-4 active:bg-mist"
+            >
+              <Package size={18} className="text-ink" />
+              <span className="flex-1 text-sm font-medium text-ink">
+                My Orders
+              </span>
+              <ChevronRight size={16} className="text-graphite" />
+            </Link>
+            <Link
+              href="/wishlist"
+              className="flex items-center gap-3 px-5 py-4 active:bg-mist"
+            >
+              <Heart size={18} className="text-ink" />
+              <span className="flex-1 text-sm font-medium text-ink">
+                Wishlist
+              </span>
+              <ChevronRight size={16} className="text-graphite" />
+            </Link>
+            <Link
+              href="/track-order"
+              className="flex items-center gap-3 px-5 py-4 active:bg-mist"
+            >
+              <MapPin size={18} className="text-ink" />
+              <span className="flex-1 text-sm font-medium text-ink">
+                Track an Order
+              </span>
+              <ChevronRight size={16} className="text-graphite" />
+            </Link>
+            <Link
+              href="/reviews"
+              className="flex items-center gap-3 px-5 py-4 active:bg-mist"
+            >
+              <Star size={18} className="text-ink" />
+              <span className="flex-1 text-sm font-medium text-ink">
+                My Reviews
+              </span>
+              <ChevronRight size={16} className="text-graphite" />
+            </Link>
+            <Link
+              href="/support"
+              className="flex items-center gap-3 px-5 py-4 active:bg-mist"
+            >
+              <LifeBuoy size={18} className="text-ink" />
+              <span className="flex-1 text-sm font-medium text-ink">
+                Help &amp; Support
+              </span>
+              <ChevronRight size={16} className="text-graphite" />
+            </Link>
+          </div>
+
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="w-full flex items-center justify-center gap-2 bg-ink text-paper py-3.5 rounded-xl font-semibold active:scale-[0.98] transition-transform"
+          >
+            <LogOut size={16} /> Log Out
+          </button>
+        </motion.div>
+
+        {/* Logout confirmation modal */}
+        <AnimatePresence>
+          {showLogoutConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-ink/50 z-50 flex items-end sm:items-center justify-center px-5"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              <motion.div
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 40, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm bg-paper rounded-2xl p-6 mb-6 sm:mb-0"
+              >
+                <p className="font-display font-bold text-lg text-ink text-center mb-1">
+                  Log out of your account?
+                </p>
+                <p className="text-graphite text-sm text-center mb-5">
+                  You can always log back in anytime.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLogoutConfirm(false)}
+                    className="flex-1 py-3 rounded-lg border border-line text-ink font-semibold text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="flex-1 py-3 rounded-lg bg-ink text-paper font-semibold text-sm"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -258,4 +467,4 @@ export default function AccountPage() {
       </div>
     </div>
   );
-                }
+}
