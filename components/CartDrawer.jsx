@@ -1,39 +1,20 @@
 // FILE PATH: components/CartDrawer.jsx
 "use client";
 
-import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/store/useCart";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 export default function CartDrawer() {
   const { isOpen, closeCart, items, updateQty, removeItem, totalPrice } =
     useCart();
   const router = useRouter();
 
-  // Lock background scroll while the drawer is open. Without this, the
-  // page behind can still scroll/resize (and on mobile the browser's
-  // address bar can collapse/expand), which throws off `fixed` elements
-  // and lets the underlying page's fixed bottom bar peek through below
-  // the drawer. Restores the exact scroll position on close.
-  useEffect(() => {
-    if (!isOpen) return;
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    return () => {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   return (
     <AnimatePresence>
