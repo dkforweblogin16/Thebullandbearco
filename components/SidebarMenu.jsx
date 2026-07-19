@@ -8,6 +8,7 @@ import { useUI } from "@/store/useUI";
 import { categories } from "@/lib/data";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabaseClient";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 const footerLinks = [
   { label: "My Orders", href: "/orders" },
@@ -23,6 +24,8 @@ export default function SidebarMenu() {
   const { menuOpen, closeMenu } = useUI();
   const { user, profile } = useAuth();
 
+  useScrollLock(menuOpen);
+
   function handleLogout() {
     supabase.auth.signOut();
     closeMenu();
@@ -36,7 +39,7 @@ export default function SidebarMenu() {
           animate={{ x: 0 }}
           exit={{ x: "-100%" }}
           transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-          className="fixed inset-0 z-50 bg-paper flex flex-col"
+          className="fixed inset-0 h-[100dvh] z-50 bg-paper flex flex-col"
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-line shrink-0">
             <button
