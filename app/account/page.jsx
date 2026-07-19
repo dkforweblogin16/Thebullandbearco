@@ -16,6 +16,7 @@ import {
   ChevronRight,
   LifeBuoy,
   Star,
+  ShieldCheck,
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
@@ -195,6 +196,21 @@ export default function AccountPage() {
               </div>
             </div>
           </div>
+
+          {/* Admin-only entry point — only renders when the signed-in
+              user's profile has is_admin = true in Supabase. */}
+          {profile?.is_admin && (
+            <Link
+              href="/admin"
+              className="flex items-center gap-3 px-5 py-4 mb-5 rounded-2xl bg-ink text-paper shadow-sm active:opacity-90"
+            >
+              <ShieldCheck size={18} />
+              <span className="flex-1 text-sm font-semibold">
+                Admin Dashboard
+              </span>
+              <ChevronRight size={16} />
+            </Link>
+          )}
 
           {/* Quick links */}
           <div className="bg-paper rounded-2xl shadow-sm divide-y divide-line mb-5 overflow-hidden">
