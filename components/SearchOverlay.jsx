@@ -7,12 +7,15 @@ import { X, Search } from "lucide-react";
 import Link from "next/link";
 import { useUI } from "@/store/useUI";
 import { fetchAllProducts } from "@/lib/products";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 export default function SearchOverlay() {
   const { searchOpen, closeSearch } = useUI();
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [loaded, setLoaded] = useState(false);
+
+  useScrollLock(searchOpen);
 
   useEffect(() => {
     if (searchOpen && !loaded) {
@@ -43,7 +46,7 @@ export default function SearchOverlay() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-paper flex flex-col"
+          className="fixed inset-0 h-[100dvh] z-50 bg-paper flex flex-col"
         >
           <div className="flex items-center gap-2 px-4 h-16 border-b border-line shrink-0">
             <Search size={18} className="text-graphite" />
