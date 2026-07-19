@@ -19,16 +19,16 @@ import DeliveryCheck from "@/components/DeliveryCheck";
 import ProductAccordions from "@/components/ProductAccordions";
 import ColorSwatches from "@/components/ColorSwatches";
 
-export default function ProductDetailClient({ id }) {
+export default function ProductDetailClient({ id, initialProduct = null }) {
   const router = useRouter();
   const addItem = useCart((s) => s.addItem);
   const { has, toggle } = useWishlist();
   const { user } = useAuth();
 
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(initialProduct);
   const [allProducts, setAllProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialProduct);
 
   const [activeImg, setActiveImg] = useState(0);
   const [activeColorIndex, setActiveColorIndex] = useState(0);
@@ -39,21 +39,43 @@ export default function ProductDetailClient({ id }) {
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
   const [reviewMsg, setReviewMsg] = useState("");
 
+  // The product itself already comes from the server (initialProduct), so
+  // this only needs to hit the network as a fallback for the rare case the
+  // server couldn't resolve it. This keeps the main image/price/buttons
+  // from being gated behind a client round trip on every navigation.
   useEffect(() => {
     let active = true;
+    setProduct(initialProduct);
+    setActiveImg(0);
+    setActiveColorIndex(0);
+
+    if (initialProduct) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    Promise.all([
-      fetchProductById(id),
-      fetchAllProducts(),
-      fetchReviews(id),
-    ]).then(([p, all, revs]) => {
+    fetchProductById(id).then((p) => {
       if (!active) return;
       setProduct(p);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [id, initialProduct]);
+
+  // Recommendations ("You May Also Like" / "Our Bestsellers") and reviews
+  // are fetched separately, in the background, so a slow catalog/reviews
+  // fetch never blocks the core product from showing.
+  useEffect(() => {
+    let active = true;
+    setAllProducts([]);
+    setReviews([]);
+    Promise.all([fetchAllProducts(), fetchReviews(id)]).then(([all, revs]) => {
+      if (!active) return;
       setAllProducts(all);
       setReviews(revs);
-      setActiveImg(0);
-      setActiveColorIndex(0);
-      setLoading(false);
     });
     return () => {
       active = false;
@@ -386,4 +408,3 @@ export default function ProductDetailClient({ id }) {
   );
 }
 
-      
