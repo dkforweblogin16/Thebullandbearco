@@ -1,32 +1,24 @@
 // FILE PATH: app/api/admin/orders/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth"; 
+import { requireAdmin } from "@/lib/adminAuth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabaseAdmin";
 
-export async function GET(req) {
-  if (!requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!isAdminConfigured) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+// GET — list all orders (any signed-in admin can view). Status/payment
+// updates happen per-order via /api/admin/orders/[id] (elevated-gated).
+export async function GET(request) {
+  const check = await requireAdmin(request);
+  if (!check.ok) {
+    return NextResponse.json({ message: check.message }, { status: check.status });
+  }
+  if (!isAdminConfigured) {
+    return NextResponse.json({ message: "Supabase not configured" }, { status: 500 });
+  }
 
   const { data, error } = await supabaseAdmin
     .from("orders")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ message: error.message }, { status: 500 });
   return NextResponse.json({ orders: data });
-}
-
-export async function PATCH(req) {
-  if (!requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!isAdminConfigured) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
-
-  const { id, order_status } = await req.json();
-
-  const { error } = await supabaseAdmin
-    .from("orders")
-    .update({ order_status })
-    .eq("id", id);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
 }
