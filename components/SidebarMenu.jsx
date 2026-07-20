@@ -2,7 +2,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { X, MessageCircle, User, LogOut } from "lucide-react";
+import { X, MessageCircle, User, LogOut, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useUI } from "@/store/useUI";
 import { categories } from "@/lib/data";
@@ -73,6 +73,16 @@ export default function SidebarMenu() {
                     {profile?.email || user.email}
                   </p>
                 </div>
+              </Link>
+            )}
+
+            {profile?.is_admin && (
+              <Link
+                href="/admin"
+                onClick={closeMenu}
+                className="flex items-center gap-2 px-4 py-3 border-b border-line text-sm font-semibold text-ink bg-mist"
+              >
+                <ShieldCheck size={16} /> Admin Dashboard
               </Link>
             )}
 
