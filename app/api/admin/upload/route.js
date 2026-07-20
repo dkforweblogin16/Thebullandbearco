@@ -1,6 +1,6 @@
 // FILE PATH: app/api/admin/upload/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireElevated } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // Receives a single image file as FormData, uploads it to the
@@ -8,9 +8,9 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 // storage permissions ever need to be exposed to the browser), and
 // returns the public URL to store in a product's `images` array.
 export async function POST(request) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
 
   const formData = await request.formData();
@@ -38,9 +38,9 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
 
   const { path } = await request.json();
