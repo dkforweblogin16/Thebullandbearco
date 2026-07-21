@@ -40,7 +40,7 @@ export async function POST(request) {
     secure: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 8, // 8 hours
+    maxAge: 60 * 60, // 1 hour
   });
   return res;
 }
@@ -55,4 +55,3 @@ export async function DELETE(request) {
   res.cookies.delete("admin_elevated");
   return res;
 }
-
