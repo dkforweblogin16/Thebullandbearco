@@ -112,7 +112,7 @@ export function ElevatedAccessProvider({ children }) {
             </div>
             <p className="text-slate-500 text-sm mt-2 mb-4">
               Adding, editing, or deleting anything needs the access passcode.
-              You'll only need to enter it once every few hours.
+              It stays unlocked for 1 hour, then locks again automatically.
             </p>
             <input
               autoFocus
@@ -165,4 +165,3 @@ export function ElevationStatusPill() {
     </button>
   );
 }
-
