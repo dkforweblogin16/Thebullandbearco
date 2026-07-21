@@ -14,7 +14,50 @@ import {
   Package,
   Lock,
   ArrowRight,
+  Stethoscope,
 } from "lucide-react";
+
+function TroubleshootPanel() {
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function run() {
+    setLoading(true);
+    try {
+      const res = await adminFetch("/api/admin/debug");
+      setReport(res);
+    } catch (e) {
+      setReport({ diagnosis: e.message });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+          <Stethoscope size={15} /> Troubleshoot access
+        </p>
+        <button
+          onClick={run}
+          disabled={loading}
+          className="text-xs font-semibold text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+        >
+          {loading ? "Checking..." : "Run check"}
+        </button>
+      </div>
+      {report && (
+        <div className="text-xs text-slate-600 space-y-1 mt-2 bg-slate-50 rounded-lg p-3">
+          <p className="font-semibold text-slate-900">{report.diagnosis}</p>
+          <pre className="whitespace-pre-wrap break-words text-[11px] text-slate-500 mt-2">
+            {JSON.stringify(report, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const statusColor = {
   placed: "bg-amber-100 text-amber-700",
@@ -66,6 +109,8 @@ export default function AdminDashboard() {
       </div>
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+
+      <TroubleshootPanel />
 
       {!data ? (
         <p className="text-slate-500 text-sm">Loading...</p>
