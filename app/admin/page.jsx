@@ -17,6 +17,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+
 function TroubleshootPanel() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
