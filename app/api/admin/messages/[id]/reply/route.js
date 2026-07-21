@@ -1,13 +1,13 @@
 // FILE PATH: app/api/admin/messages/[id]/reply/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireElevated } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendEmail } from "@/lib/email";
 
 export async function POST(request, { params }) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
 
   const { reply } = await request.json();

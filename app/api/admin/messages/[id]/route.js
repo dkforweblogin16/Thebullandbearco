@@ -1,12 +1,12 @@
 // FILE PATH: app/api/admin/messages/[id]/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireElevated } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function PATCH(request, { params }) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
   const body = await request.json(); // { is_read: true/false }
   const { data, error } = await supabaseAdmin
@@ -20,9 +20,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
   const { error } = await supabaseAdmin.from("contact_messages").delete().eq("id", params.id);
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });

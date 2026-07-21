@@ -3,7 +3,6 @@
 
 import { useRef, useState } from "react";
 import { adminFetch } from "@/lib/adminApi";
-import { supabase } from "@/lib/supabaseClient";
 import { Upload, X, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 
 // A drop-in multi-image uploader. Give it the current `images` array
@@ -21,20 +20,14 @@ export default function ImageUploader({ images, onChange }) {
     setError("");
 
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-
       const uploaded = [];
       for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("/api/admin/upload", {
+        const json = await adminFetch("/api/admin/upload", {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.message || "Upload failed");
         uploaded.push(json.url);
       }
       onChange([...(images || []), ...uploaded]);

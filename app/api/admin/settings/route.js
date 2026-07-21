@@ -1,6 +1,6 @@
 // FILE PATH: app/api/admin/settings/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireAdmin, requireElevated } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // GET is admin-only here (returns everything at once for the dashboard
@@ -23,9 +23,9 @@ export async function GET(request) {
 
 // Body: { key: "announcement_bar", value: {...} }
 export async function PATCH(request) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
   const { key, value } = await request.json();
   if (!key) return NextResponse.json({ message: "Missing key." }, { status: 400 });

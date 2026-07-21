@@ -1,14 +1,7 @@
 // FILE PATH: app/layout.jsx
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
-import SidebarMenu from "@/components/SidebarMenu";
-import CartDrawer from "@/components/CartDrawer";
-import SearchOverlay from "@/components/SearchOverlay";
-import AnnouncementBar from "@/components/AnnouncementBar";
-import Footer from "@/components/Footer";
-import MainWrapper from "@/components/MainWrapper";
+import ConditionalChrome from "@/components/ConditionalChrome";
 import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
@@ -35,16 +28,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-body">
         <AuthProvider>
-          <AnnouncementBar />
-          <Header />
-          <SidebarMenu />
-          <SearchOverlay />
-          <CartDrawer />
-          <MainWrapper>
-            {children}
-            <Footer />
-          </MainWrapper>
-          <BottomNav />
+          <ConditionalChrome>{children}</ConditionalChrome>
         </AuthProvider>
       </body>
     </html>

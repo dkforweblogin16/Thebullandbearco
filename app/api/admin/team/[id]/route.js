@@ -1,14 +1,14 @@
 // FILE PATH: app/api/admin/team/[id]/route.js
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireElevated } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 // Toggles someone's is_admin flag. An admin can never remove their own
 // admin access here -- prevents accidentally locking yourself out.
 export async function PATCH(request, { params }) {
-  const check = await requireAdmin(request);
+  const check = await requireElevated(request);
   if (!check.ok) {
-    return NextResponse.json({ message: check.message }, { status: check.status });
+    return NextResponse.json({ message: check.message, code: check.code }, { status: check.status });
   }
 
   if (params.id === check.user.id) {
