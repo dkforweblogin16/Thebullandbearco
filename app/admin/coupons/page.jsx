@@ -263,6 +263,7 @@ export default function AdminCoupons() {
               </div>
               <input
                 type="date"
+                placeholder="Activate/Expiry Date"
                 value={form.expires_at}
                 onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
                 className="w-full border border-line rounded-lg px-3 py-2.5 text-sm"
