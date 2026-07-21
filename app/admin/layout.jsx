@@ -24,7 +24,7 @@ import {
   LogOut,
   Menu,
   X,
-  ExternalLink,
+  ArrowLeft,
 } from "lucide-react";
 
 const navItems = [
@@ -118,16 +118,7 @@ function AdminShell({ children }) {
               {profile?.full_name || profile?.email}
             </span>
           </p>
-          <div className="flex items-center gap-3">
-            <ElevationStatusPill />
-            <Link
-              href="/"
-              target="_blank"
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900"
-            >
-              View storefront <ExternalLink size={12} />
-            </Link>
-          </div>
+          <ElevationStatusPill />
         </div>
 
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden">{children}</main>
@@ -163,6 +154,12 @@ function SidebarFooter({ profile }) {
           {profile?.full_name || profile?.email}
         </p>
       </div>
+      <Link
+        href="/"
+        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5"
+      >
+        <ArrowLeft size={16} /> Back to Website
+      </Link>
       <button
         onClick={() => supabase.auth.signOut()}
         className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-white/5"
